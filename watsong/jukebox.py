@@ -28,7 +28,8 @@ def jukebox() -> Any:
     """
     Renders the empty jukebox page.
     """
-    songs: List[Song] = []
+    session["songs"] = []
+    songs: List[Song] = session["songs"]
     query = ""
     if request.method == "POST":
         query = request.form["query"]
@@ -105,7 +106,8 @@ def showPlaylist() -> Any:
     Show embedded spotify playlist
     """
     songs = spotify.filter_songs(session["feel"], session["songs"])
-
+    if not session["songs"]:
+        return jsonify("")
     url = spotify.create_playlist(songs, current_app.spotify, full_url=False)
     return jsonify(url)
 

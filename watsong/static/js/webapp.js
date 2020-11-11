@@ -110,11 +110,12 @@ function setSongs(songs) {
     });
 }
 
-const LOGIN_ALERT = "You are currently logging into spotify in another tab. Please finish that operation before using this function."
 
 function showPlaylist() {
-    const playlistId = GLOBAL.getPlaylistId();
     $.getJSON($SCRIPT_ROOT + '/jukebox/showPlaylist', {}, function (playlistId) {
+        if (playlistId === "") {
+            return;
+        }
         const url = 'https://open.spotify.com/embed/playlist/' + playlistId;
         const playlist = $("#playlist");
         playlist.empty();
@@ -131,7 +132,6 @@ function showPlaylist() {
 function subscribeToPlaylist() {
     const playlistId = GLOBAL.getPlaylistId();
     $.getJSON($SCRIPT_ROOT + '/jukebox/subscribe', {playlistId}, ({msg}) => {
-        GLOBAL.setLoggingIn(false)
         alert(msg);
     });
 }
@@ -177,7 +177,6 @@ const StateModule = () => {
         if (!skipRequest) {
             $.getJSON($SCRIPT_ROOT + '/jukebox/filter', feel, setSongs);
             const select = $("#" + field + "_value");
-            console.log(select)
             select[0].innerText = Math.round(100 * value) + '%'
         }
     };
