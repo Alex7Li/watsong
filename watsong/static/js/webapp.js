@@ -114,50 +114,33 @@ const LOGIN_ALERT = "You are currently logging into spotify in another tab. Plea
 
 function showPlaylist() {
     const playlistId = GLOBAL.getPlaylistId();
-    if (!GLOBAL.loggingIn()) {
-        GLOBAL.setLoggingIn(true);
-        $.getJSON($SCRIPT_ROOT + '/jukebox/showPlaylist', {}, function (playlistId) {
-            GLOBAL.setLoggingIn(false);
-            const url = 'https://open.spotify.com/embed/playlist/' + playlistId;
-            const playlist = $("#playlist");
-            playlist.empty();
-            playlist.append(`<iframe src="${url}" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media" id="spotify"></iframe>`);
-            const button = $("#subscribe-button");
-            if (button.length === 0) {
-                $("#jukebox-form").append(`<button type="button" id="subscribe-button" class="chunky-button" onclick="subscribeToPlaylist()">Subscribe</button>`);
-            }
+    $.getJSON($SCRIPT_ROOT + '/jukebox/showPlaylist', {}, function (playlistId) {
+        const url = 'https://open.spotify.com/embed/playlist/' + playlistId;
+        const playlist = $("#playlist");
+        playlist.empty();
+        playlist.append(`<iframe src="${url}" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media" id="spotify"></iframe>`);
+        const button = $("#subscribe-button");
+        if (button.length === 0) {
+            $("#jukebox-form").append(`<button type="button" id="subscribe-button" class="chunky-button" onclick="subscribeToPlaylist()">Subscribe</button>`);
+        }
 
-            GLOBAL.setPlaylistId(playlistId);
-        });
-    } else {
-        alert(LOGIN_ALERT)
-    }
+        GLOBAL.setPlaylistId(playlistId);
+    });
 }
 
 function subscribeToPlaylist() {
     const playlistId = GLOBAL.getPlaylistId();
-    if (!GLOBAL.loggingIn()) {
-        GLOBAL.setLoggingIn(true);
-        $.getJSON($SCRIPT_ROOT + '/jukebox/subscribe', {playlistId}, ({msg}) => {
-            GLOBAL.setLoggingIn(false)
-            alert(msg);
-        });
-    } else {
-        alert(LOGIN_ALERT)
-    }
+    $.getJSON($SCRIPT_ROOT + '/jukebox/subscribe', {playlistId}, ({msg}) => {
+        GLOBAL.setLoggingIn(false)
+        alert(msg);
+    });
 }
 
 function logout() {
     // Sometimes things break and the user closes the login tab before the spotify operation finishes,
     // or when the internet is too slow. I think spotify might be mad at my account for overtesting it
     // with too many logins though...
-    if (!GLOBAL.loggingIn()) {
-        GLOBAL.setLoggingIn(true)
-    } else {
-        alert(LOGIN_ALERT)
-    }
     $.getJSON($SCRIPT_ROOT + '/jukebox/logout', {}, ({success, msg}) => {
-        GLOBAL.setLoggingIn(false)
         if (!success) {
             alert(msg);
         }
@@ -180,20 +163,6 @@ const StateModule = () => {
     let feel = {};
     let playlistId = null;
 
-    /** A boolean parameter for if you are currently logging into spotify.
-     * Helps ensure that multiple requests don't occur at the same time */
-    let isLoggingIn = false
-
-    /**
-     *
-     * @param newVal if the user is logging in
-     */
-    const setLoggingIn = (newVal) => {
-        isLoggingIn = newVal;
-    }
-
-    const loggingIn = () => isLoggingIn
-
     /**
      * setFeel sets a field in `feel`
      *
@@ -209,7 +178,7 @@ const StateModule = () => {
             $.getJSON($SCRIPT_ROOT + '/jukebox/filter', feel, setSongs);
             const select = $("#" + field + "_value");
             console.log(select)
-            select[0].innerText = Math.round(100*value) + '%'
+            select[0].innerText = Math.round(100 * value) + '%'
         }
     };
 
@@ -244,7 +213,7 @@ const StateModule = () => {
     };
 
     return {
-        setFeel, getFeel, getPlaylistId, setPlaylistId, setLoggingIn, loggingIn
+        setFeel, getFeel, getPlaylistId, setPlaylistId
     };
 };
 
